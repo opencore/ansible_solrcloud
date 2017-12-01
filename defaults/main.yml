@@ -1,0 +1,18 @@
+---
+solr_version: 7.1.0
+
+base_packages:
+  - libselinux-python
+  - java-1.8.0-openjdk
+  - wget
+  - curl
+  - openssl
+  - python
+  - zip
+  - unzip
+  - git
+  - tar
+  - gzip
+  - lsof
+
+collection_name: cobacore

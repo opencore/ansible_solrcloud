@@ -1,0 +1,13 @@
+[Unit]
+Description=Apache Solr
+
+[Service]
+User=solr
+Type=forking
+EnvironmentFile=/etc/sysconfig/solr
+ExecStart=/opt/solr/bin/solr start
+ExecStop=/opt/solr/bin/solr stop
+
+[Install]
+Alias=solr
+WantedBy=default.target

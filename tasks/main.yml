@@ -1,0 +1,68 @@
+---
+- name: Create solr service user
+  user:
+    name: solr
+    shell: /bin/nologin
+
+- name: Install necessary packages
+  yum:
+    name: '{{ item }}'
+    state: present
+    update_cache: yes
+  with_items: '{{ base_packages }}'
+
+- name: Download and unzip solr binaries
+  unarchive:
+    src: http://apache.lauf-forum.at/lucene/solr/{{ solr_version }}/solr-{{ solr_version }}.tgz
+    remote_src: yes
+    dest: /opt/
+    creates: /opt/solr-{{ solr_version }}
+
+- name: Symlink current solr version
+  file:
+    src: /opt/solr-{{ solr_version }}
+    dest: /opt/solr
+    state: link
+
+- name: Ensure correct permissions on solr dir
+  file:
+    path: /opt/solr-{{ solr_version }}
+    owner: solr
+    group: solr
+    recurse: yes
+
+- name: Create solr service environment file
+  template:
+    src: solr.j2
+    dest: /etc/sysconfig/solr
+
+- name: Create solr service
+  template:
+    src: solr.service.j2
+    dest: /etc/systemd/system/solr.service
+
+- name: Start service
+  service:
+    name: solr
+    state: started
+    enabled: yes
+
+- name: Create directory for cobacore core
+  file:
+    path: /opt/solr-{{ solr_version }}/server/solr/cobacore
+    state: directory
+    owner: solr
+    group: solr
+
+- name: Copy config to cobacore
+  command: cp -r /opt/solr-{{ solr_version }}/server/solr/configsets/basic_configs/conf /opt/solr-{{ solr_version }}/server/solr/{{ collection_name }}
+  args:
+    creates: /opt/solr-{{ solr_version }}/server/solr/{{ collection_name }}/conf
+
+- name: Create core
+  become: true
+  become_user: solr
+  command: ./solr create -c {{ collection_name }}
+  args:
+    chdir: /opt/solr/bin
+    creates: /opt/solr/server/solr/cobacore/data
