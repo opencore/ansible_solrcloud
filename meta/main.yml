@@ -53,4 +53,4 @@ galaxy_info:
     #       Maximum 20 tags per role.
 
 dependencies:
-  - { role: 'git+https://github.com/opencore/ansible_zookeeper.git'}
+  - { role: 'git+https://github.com/opencore/ansible_zookeeper.git,master'}
